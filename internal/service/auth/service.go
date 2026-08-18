@@ -80,8 +80,9 @@ func (s Service) Authenticate(ctx context.Context, token string) (operator.Opera
 	if err != nil {
 		return operator.Operator{}, apperror.Unauthorized(errors.New("session is invalid or expired"))
 	}
-	now := s.Clock.Now()
-	if !now.Before(session.ExpiresAt) {
+	validAt := s.Clock.Now()
+	sessionValid := session.ValidAt(validAt)
+	if sessionValid == false {
 		return operator.Operator{}, apperror.Unauthorized(errors.New("session is invalid or expired"))
 	}
 	value, err := s.Store.GetOperator(ctx, session.OperatorID)
